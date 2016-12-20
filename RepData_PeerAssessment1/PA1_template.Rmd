@@ -1,0 +1,103 @@
+---
+title: "Reproducible Research: Peer Assessment 1"
+author: "Cheng Zhiyuan"
+date: "December 19, 2016"
+output: html_document
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading and preprocessing the data
+
+```{r}
+# set up the working directory
+setwd("c:/MyWorkspace/MyLearning/Data Science/Data Science Coursera/RepData_PeerAssessment1")
+# load the required library
+library (ggplot2)
+```
+
+```{r}
+# loading the data
+originalData <- read.csv("./activity/activity.csv", head=TRUE,  na.strings="NA")
+```
+
+## What is mean total number of steps taken per day?
+```{r}
+# calculate the steps per day
+step_by_day <- aggregate(steps ~ date,originalData,sum)
+hist(step_by_day$steps, breaks = 20, main = paste("Step Distribution Per Day"), col="blue",xlab="Number of Steps")
+```
+
+```{r}
+summary(step_by_day$steps)
+```
+The mean value is 10770 and the median value is 10760
+
+## What is the average daily activity pattern?
+```{r}
+# calculate mean steps of each interval
+step_by_interval <- aggregate(steps ~ interval, originalData, mean)
+plot(step_by_interval$interval,step_by_interval$steps, type="l",xlab="5 minutes interval",ylab="average steps per interval")
+```
+```{r}
+# show the max average step
+step_by_interval[step_by_interval$steps == max(step_by_interval$steps), ]
+```
+It shows that the max step of interval is 206
+
+## Imputing missing values
+
+```{r}
+# calculate the number of missing value
+sum(is.na(originalData$steps))
+```
+There is total 2304 rows with missing value.
+
+```{r}
+# use the mean value to fill in the column. And create a data set with data fill in.
+imputeData <- originalData
+na_index <- is.na(imputeData$steps)
+meanValue <- tapply(originalData$steps, originalData$interval, mean, na.rm=TRUE, simplify=T)
+imputeData$steps[na_index] <- meanValue[as.character(imputeData$interval[na_index])]
+```
+
+```{r}
+# rebuild the graph
+step_by_day1 <- aggregate(steps ~ date,imputeData,sum)
+hist(step_by_day1$steps, breaks = 20, main = paste("Step Distribution Per Day"), col="blue",xlab="Number of Steps")
+
+step_by_interval1 <- aggregate(steps ~ interval, imputeData, mean)
+plot(step_by_interval1$interval,step_by_interval$steps, type="l",xlab="5 minutes interval",ylab="average steps per interval")
+```
+```{r}
+
+```
+```{r}
+summary(step_by_day1$steps)
+```
+
+Compare to the original data, the mean value does not change while median value changed from 10760 to 10770. If we including the missing value, the median has slightly shift to a large number.
+
+## Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+# Add the day type on the original data
+is_weekday <- function(d) {
+    wd <- weekdays(d)
+    ifelse (wd == "Saturday" | wd == "Sunday", "weekend", "weekday")
+}
+
+weekday<- sapply(as.Date(imputeData$date),is_weekday)
+imputeData$wk <- as.factor(weekday)
+```
+
+```{r}
+# make up the plot
+step_by_interval2 <- aggregate(steps ~ wk + interval, imputeData, mean)
+g <- ggplot(step_by_interval2,aes(interval,steps,color=wk)) + geom_line(stat="identity")
+g
+```
+The graph infers that steps of weekends would be a little higher than steps of weekdays.
