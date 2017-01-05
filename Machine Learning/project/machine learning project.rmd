@@ -1,0 +1,91 @@
+---
+title: "Machine Learnning Project"
+author: "Cheng Zhiyuan"
+date: "January 3, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Synopsis
+
+This paper is to try the different machine learning method and find a best to predict classification. The first part is use rpart method. And second part is random forest method.
+
+
+```{r}
+# setup the work directory and load necessary library
+setwd("c:/MyWorkspace/MyLearning/Data Science/Data Science Coursera/machine learning/Project")
+library(caret)
+library(rattle)
+library(rpart)
+library(rpart.plot)
+library(randomForest)
+library(repmis)
+```
+
+## Process the data
+
+```{r}
+# loading the training and testing data, and remove NA data in the training set
+training <- read.csv("pml-training.csv", na.strings = c("NA", ""))
+training <- training[, colSums(is.na(training)) == 0]
+testing <- read.csv("pml-testing.csv", na.strings = c("NA", ""))
+```
+
+```{r}
+# remove the unneccesary data
+training <- training[, -c(1:7)]
+testing <- testing[, -c(1:7)]
+# remove the NA column
+training <- training[, colSums(is.na(training)) == 0]
+testing <- testing[, colSums(is.na(testing)) == 0]
+```
+
+```{r}
+# split the training dataset into training and validate dataset
+set.seed(198156)
+trainingsetting <- createDataPartition(training$classe, p = 0.6, list = FALSE)
+trainingdata <- training[trainingsetting,]
+validatedate <- training[-trainingsetting,] 
+```
+
+## rpart Prediction
+
+```{r}
+# use rpart to training the model
+control <- trainControl(method = "cv", number = 5)
+fit_rpart = rpart(classe ~ ., data = trainingdata, method = "class")
+fancyRpartPlot(fit_rpart)
+```
+
+```{r}
+# use the validate dataset to verify the fit model
+predict_rpart <- predict(fit_rpart,validatedate,type ="class")
+confusionMatrix(validatedate$classe, predict_rpart)
+```
+
+The overall accurary of rpart method is 0.7539. 
+
+## Ramdom Forest Prediction
+
+```{r}
+fit_rf <- train(classe ~ ., data = trainingdata, method = "rf", trControl = control)
+print(fit_rf, digits = 4)
+```
+
+```{r}
+# predict outcomes using validation set
+predict_rf <- predict(fit_rf, validatedate)
+confusionMatrix(validatedate$classe, predict_rf)
+```
+
+The overall accuracy of ramdom forest method is 0.9925
+
+## Prediction on testing set
+
+Now we will use ramdom forest model to predict the testing data set
+```{r}
+predict(fit_rf, testing)
+```
