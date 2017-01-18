@@ -28,11 +28,22 @@ This application will allow the user to:
 Application will abstract the data and make the plot lines of average number of taxi trips for the day of the week during the time frame selected.
 
 
-
-
-Slide With Plot
+The Data
 ========================================================
+type: sub-section
+This application is based on the New York Yellow Taxi volume for January 2015.
 
-```{r, echo=FALSE}
-plot(cars)
+Dataset has been obtained from [here](https://github.com/heartparty/datasciencecoursera/blob/master/DataProducts/week4/tripData.csv) and processed for the course project.
+
+Source code for the project is available on the [GitHub](https://github.com/heartparty/datasciencecoursera).
+
+
+Data
+=====================
+type: sub-section
+Read Data
+```{r}
+taxiData <- read.csv('C:/MyWorkspace/MyLearning/Data Science/Data Science Coursera/DataProducts/week4/tripData.csv', stringsAsFactors = FALSE)
+head(taxiData)
 ```
+
