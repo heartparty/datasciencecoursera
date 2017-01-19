@@ -18,4 +18,4 @@ The distance between different places given longitude and latitude coordinates a
 
 The source code is available on the following GitHub repository: 
 
-<https://github.com/bolaik/ShinyMapMacDonald>.
+<https://github.com/heartparty/datasciencecoursera/tree/master/DataProducts/week2>.
